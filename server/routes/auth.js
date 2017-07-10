@@ -41,7 +41,7 @@ passport.use(new LocalStrategy({
 )
 
 router.post('/sign-in',
-  passport.authenticate('local', { successRedirect: '/',
+  passport.authenticate('local', { successRedirect: '/home',
     failureRedirect: '/sign_in',
     failureFlash: true })
 )
@@ -54,11 +54,6 @@ router.post('/sign-up', (request, response) => {
     console.log(`${email} added`)
     response.redirect('/')
   })
-})
-
-router.get('/sign-out', (request, response) => {
-  request.logout()
-  response.redirect('/sign_in')
 })
 
 module.exports = router
