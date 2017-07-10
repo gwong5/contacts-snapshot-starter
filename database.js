@@ -3,7 +3,7 @@ const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/
 const db = pgp(connectionString)
 
 
-const createContact = function(contact, callback){
+const createContact = function(contact){
   return db.query(`
     INSERT INTO
       contacts (first_name, last_name)
