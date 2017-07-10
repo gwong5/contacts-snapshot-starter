@@ -34,6 +34,10 @@ app.use((request, response, next) => {
   next()
 })
 
+app.get('/', (request, response) => {
+  response.render('index')
+})
+
 app.get('/sign_up', (request, response) => {
   response.render('sign_up')
 })
@@ -50,13 +54,19 @@ app.get('/sign_in', (request, response) => {
   }
  })
 
-app.get('/', (request, response) => {
+app.get('/home', (request, response) => {
   const contacts = database.getContacts()
-  .then((contacts) => {response.render('index', { contacts })})
+  .then((contacts) => {response.render('home', { contacts })})
   .catch( err => console.log('err', err) )
 })
 
 app.use('/contacts', contacts)
+
+app.get('/sign-out', (request, response) => {
+  request.logout()
+  response.redirect('/')
+})
+
 
 app.use((request, response) => {
   response.render('not_found')

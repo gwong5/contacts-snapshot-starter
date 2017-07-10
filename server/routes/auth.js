@@ -1,10 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcrypt')
-const saltRounds = 10
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const User = require('../../usersDb')
+
+const salt = bcrypt.genSaltSync(10)
+const hash = (plainTextPassword) => bcrypt.hashSync(plainTextPassword, salt)
 
 passport.serializeUser((user, done) => {
   done(null, user.id)
@@ -27,37 +29,31 @@ passport.use(new LocalStrategy({
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' })
       }
-      // if (!user.validPassword(password)) {
-      //   return done(null, false, { message: 'Incorrect password.' })
-      // }
-      console.log(`${user[0].email} logged in`);
-      return done(null, user[0])
+      bcrypt.compare(password, user[0].password).then((result) => {
+        if (!result) {
+          return done(null, false, { message: 'Incorrect password.'})
+        }
+        console.log(`${user[0].email} logged in`);
+        return done(null, user[0])
+      })
     })
   })
 )
 
 router.post('/sign-in',
-  passport.authenticate('local', { successRedirect: '/',
+  passport.authenticate('local', { successRedirect: '/home',
     failureRedirect: '/sign_in',
     failureFlash: true })
 )
 
 router.post('/sign-up', (request, response) => {
   const { email, password } = request.body
-  bcrypt.genSalt(saltRounds, (error, salt) => {
-    bcrypt.hash(password, salt, (error, hash) => {
-      User.addNewUser(email, hash)
-      .then(() => {
-        console.log(`${email} added`)
-        response.redirect('/')
-      })
-    })
+  const hashedPassword = hash(password)
+  User.addNewUser(email, hashedPassword)
+  .then(() => {
+    console.log(`${email} added`)
+    response.redirect('/')
   })
-})
-
-router.get('/sign-out', (request, response) => {
-  request.logout()
-  response.redirect('/sign_in')
 })
 
 module.exports = router

@@ -50,4 +50,21 @@ users.findById = (id) => {
   .catch((error) => error)
 }
 
+users.validatePassword = (email, password) => {
+  console.log('validating')
+  return db.query(`
+    SELECT 
+      * 
+    FROM 
+      users 
+    WHERE 
+      email = $1 AND password = $2
+  `, [
+    email, 
+    password
+  ])
+  .then(user => user)
+  .catch(data => data)
+}
+
 module.exports = users
