@@ -21,19 +21,20 @@ passport.deserializeUser((id, done) => {
 
 passport.use(new LocalStrategy({
     usernameField: 'email',
-    passwordField: 'password'
+    passwordField: 'password',
+    passReqToCallback: true
   },
-  (username, password, done) => {
+  (request, username, password, done) => {
     User.findUser(username)
     .then((user) => {
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username.' })
+      if (!user[0]) {
+        return done(null, false, request.flash('loginError', 'Invalid username or password.'))
       }
       bcrypt.compare(password, user[0].password).then((result) => {
         if (!result) {
-          return done(null, false, { message: 'Incorrect password.'})
+          return done(null, false, request.flash('loginError', 'Invalid username or password.'))
         }
-        console.log(`${user[0].email} logged in`);
+        console.log(`${user[0].email} signed in`);
         return done(null, user[0])
       })
     })
@@ -48,11 +49,19 @@ router.post('/sign-in',
 
 router.post('/sign-up', (request, response) => {
   const { email, password } = request.body
-  const hashedPassword = hash(password)
-  User.addNewUser(email, hashedPassword)
-  .then(() => {
-    console.log(`${email} added`)
-    response.redirect('/')
+  User.findUser(email)
+  .then((user, done) => {
+    if (user[0]) {
+      request.flash('creationError', 'User already exists.')
+      response.redirect('/sign_up')
+    } else {
+      const hashedPassword = hash(password)
+      User.addNewUser(email, hashedPassword)
+      .then(() => {
+        console.log(`account created for: ${email}`)
+        response.redirect('/')
+      })
+    }
   })
 })
 

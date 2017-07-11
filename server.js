@@ -1,12 +1,13 @@
 const express = require('express')
-const bodyParser = require('body-parser')
-const database = require('./database')
+const passport = require('passport')
 const session = require('express-session')
-const app = express()
+const bodyParser = require('body-parser')
+const flash = require('connect-flash')
+const database = require('./database')
 const {renderError} = require('./server/utils')
 const contacts = require('./server/routes/contacts')
 const users = require('./server/routes/auth')
-const passport = require('passport')
+const app = express()
 
 app.set('view engine', 'ejs');
 app.set('trust proxy', 1)
@@ -19,6 +20,7 @@ app.use(session({
 
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(flash())
 
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -39,11 +41,11 @@ app.get('/', (request, response) => {
 })
 
 app.get('/sign_up', (request, response) => {
-  response.render('sign_up')
+  response.render('sign_up', { creationError: request.flash('creationError')})
 })
 
 app.get('/sign_in', (request, response) => {
-  response.render('sign_in')
+  response.render('sign_in', { loginError: request.flash('loginError') })
 })
 
  app.use((req, res, next) => {
@@ -63,6 +65,7 @@ app.get('/home', (request, response) => {
 app.use('/contacts', contacts)
 
 app.get('/sign-out', (request, response) => {
+  console.log(`${request.user[0].email} signed out`)
   request.logout()
   response.redirect('/')
 })
