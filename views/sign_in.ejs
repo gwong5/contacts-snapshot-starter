@@ -4,6 +4,11 @@
     <input type="email" name="email" placeholder="email" value="blah@blah">
     <input type="password" name="password" placeholder="password" value="blah">
     <input type="submit" value="sign-in">
+    <% if (loginError)  { %>
+    <div>
+      <%= loginError %>
+    </div>
+    <% } %>
   </form>
 
 <% include footer.ejs %>
