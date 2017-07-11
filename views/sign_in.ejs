@@ -1,8 +1,8 @@
 <% include header.ejs %>
 
   <form action="/sign-in" method="post">
-    <input type="email" name="email" placeholder="email" value="blah@blah">
-    <input type="password" name="password" placeholder="password" value="blah">
+    <input type="email" name="email" placeholder="email" required>
+    <input type="password" name="password" placeholder="password" required>
     <input type="submit" value="sign-in">
     <% if (loginError)  { %>
     <div>
