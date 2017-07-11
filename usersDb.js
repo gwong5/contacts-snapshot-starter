@@ -15,7 +15,7 @@ users.addNewUser = (email, password) => {
     email,
     password
   ])
-  .catch((error) => error)
+  .catch(error => error)
 }
 
 users.findUser = (email) => {
@@ -30,8 +30,8 @@ users.findUser = (email) => {
   [
     email
   ])
-  .then((data) => data)
-  .catch((error) => error)
+  .then(data => data)
+  .catch(error => error)
 }
 
 users.findById = (id) => {
@@ -46,12 +46,11 @@ users.findById = (id) => {
   [
     id
   ])
-  .then((user) => user)
-  .catch((error) => error)
+  .then(user => user)
+  .catch(error => error)
 }
 
 users.validatePassword = (email, password) => {
-  console.log('validating')
   return db.query(`
     SELECT 
       * 
@@ -64,7 +63,7 @@ users.validatePassword = (email, password) => {
     password
   ])
   .then(user => user)
-  .catch(data => data)
+  .catch(error => error)
 }
 
 module.exports = users
