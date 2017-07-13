@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-const OAuthStrategy = require('passport-oauth').OAuthStrategy
+const TwitterStrategy = require('passport-twitter').Strategy
 const DbUser = require('../../database/users')
 const User = require('../../domain/users')
 
@@ -40,32 +40,28 @@ passport.use(new LocalStrategy({
   })
 )
 
-passport.use('twitter', new OAuthStrategy({
-    requestTokenURL: '	https://api.twitter.com/oauth/request_token',
-    accessTokenURL: '	https://api.twitter.com/oauth/access_token',
-    userAuthorizationURL: '	https://api.twitter.com/oauth/authorize',
+passport.use(new TwitterStrategy({
     consumerKey: 'GUA8YmjPT7ON2duLKATsIiGCD',
     consumerSecret: 'Ag2uqebCOJedaqIFBSdXiQiKOjYsuGR90cWySteTqUEXRWLXwm',
-    callbackURL: 'http://localhost:3000/auth/twitter/callback'
+    userProfileURL: 'https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true',
+    callbackURL: 'http://127.0.0.1:3000/auth/twitter/callback'
   },
   function(token, tokenSecret, profile, done) {
-    console.log(token)
-    console.log(tokenSecret)
-    console.log(profile)
-    User.findOrCreate(profile.email, tokenSecret)
+    User.findOrCreate(profile.emails[0].value, tokenSecret)
     .then((user) => {
+      console.log(`${user.email} has signed in`)
       done(null, user)
     })
   }
 ))
 
-router.get('/auth/twitter', passport.authenticate('twitter'))
+router.get('/auth/twitter',
+  passport.authenticate('twitter')
+)
 
 router.get('/auth/twitter/callback',
-  passport.authenticate('twitter', {
-    successRedirect: '/home',
-    failureRedirect: '/sign_in'
-  })
+  passport.authenticate('twitter', { successRedirect: '/home',
+    failureRedirect: '/sign_in'})
 )
 
 router.post('/sign-in',

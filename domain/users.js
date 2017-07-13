@@ -24,4 +24,4 @@ const findOrCreate = (email, tokenSecret) => {
   })
 }
 
-module.exports = {makeSaltedPassword, validatePassword, addNewUser}
+module.exports = {makeSaltedPassword, validatePassword, addNewUser, findOrCreate}

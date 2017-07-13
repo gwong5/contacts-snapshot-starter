@@ -69,7 +69,7 @@ app.get('/home', (request, response) => {
 app.use('/contacts', contacts)
 
 app.get('/sign-out', (request, response) => {
-  console.log(`${request.user[0].email} signed out`)
+  console.log(`${request.user.email} signed out`)
   request.logout()
   response.redirect('/')
 })
