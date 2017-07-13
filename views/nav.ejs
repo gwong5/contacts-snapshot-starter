@@ -1,8 +1,16 @@
 <nav>
-  <a href="/">Home</a>
-  <form method="get" action="/contacts/search" class="search-form">
-    <input name="q" type="search" placeholder="search" value="<%= query %>" autofocus/>
-    <input type="submit" style="display: none" />
-  </form>
-  <a href="/contacts/new">New Contact</a>
+  <% if (user) { %>
+    <a href="/home">Home</a>
+    <form method="get" action="/contacts/search" class="search-form">
+      <input name="q" type="search" placeholder="search" value="<%= query %>" autofocus/>
+      <input type="submit" style="display: none" />
+    </form>
+    <form method="get" action="/sign-out" class="right">
+      <input type="submit" value="Sign Out">
+    </form>
+  <% } else { %>
+    <a href="/">Home</a>
+    <a href="/sign_up" class="right">Sign Up</a>
+    <a href="/sign_in" class="right">Sign In</a>
+  <% } %>
 </nav>

@@ -98,3 +98,8 @@ nav .search-form input {
   color: red;
   font-weight: bold;
 }
+
+.right {
+  float: right;
+  padding-left: 10px;
+}
