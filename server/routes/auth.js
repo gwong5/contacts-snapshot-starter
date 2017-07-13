@@ -1,19 +1,17 @@
 const express = require('express')
 const router = express.Router()
-const bcrypt = require('bcrypt')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-const User = require('../../usersDb')
-
-const salt = bcrypt.genSaltSync(10)
-const hash = (plainTextPassword) => bcrypt.hashSync(plainTextPassword, salt)
+const OAuthStrategy = require('passport-oauth').OAuthStrategy
+const DbUser = require('../../database/users')
+const User = require('../../domain/users')
 
 passport.serializeUser((user, done) => {
   done(null, user.id)
 })
 
 passport.deserializeUser((id, done) => {
-  User.findById(id)
+  DbUser.findById(id)
   .then((user) => {
     return done(null, user)
   })
@@ -24,20 +22,49 @@ passport.use(new LocalStrategy({
     passwordField: 'password',
     passReqToCallback: true
   },
-  (request, username, password, done) => {
-    User.findUser(username)
+  (request, email, plainTextPassword, done) => {
+    DbUser.findUser(email)
     .then((user) => {
-      if (!user[0]) {
-        return done(null, false, request.flash('loginError', 'Invalid username or password.'))
+      if (!user) {
+        return done(null, false, request.flash('loginError', 'Invalid email or password.'))
       }
-      bcrypt.compare(password, user[0].password).then((result) => {
-        if (!result) {
-          return done(null, false, request.flash('loginError', 'Invalid username or password.'))
-        }
-        console.log(`${user[0].email} signed in`);
-        return done(null, user[0])
+      User.validatePassword(plainTextPassword, user.salted_password)
+        .then((isValid) => {
+          if (!isValid) {
+            return done(null, false, request.flash('loginError', 'Invalid email or password.'))
+           }
+          console.log(`${user.email} signed in`);
+          return done(null, user)
       })
     })
+  })
+)
+
+passport.use('twitter', new OAuthStrategy({
+    requestTokenURL: '	https://api.twitter.com/oauth/request_token',
+    accessTokenURL: '	https://api.twitter.com/oauth/access_token',
+    userAuthorizationURL: '	https://api.twitter.com/oauth/authorize',
+    consumerKey: 'GUA8YmjPT7ON2duLKATsIiGCD',
+    consumerSecret: 'Ag2uqebCOJedaqIFBSdXiQiKOjYsuGR90cWySteTqUEXRWLXwm',
+    callbackURL: 'http://localhost:3000/auth/twitter/callback'
+  },
+  function(token, tokenSecret, profile, done) {
+    console.log(token)
+    console.log(tokenSecret)
+    console.log(profile)
+    User.findOrCreate(profile.email, tokenSecret)
+    .then((user) => {
+      done(null, user)
+    })
+  }
+))
+
+router.get('/auth/twitter', passport.authenticate('twitter'))
+
+router.get('/auth/twitter/callback',
+  passport.authenticate('twitter', {
+    successRedirect: '/home',
+    failureRedirect: '/sign_in'
   })
 )
 
@@ -49,17 +76,19 @@ router.post('/sign-in',
 
 router.post('/sign-up', (request, response) => {
   const { email, password } = request.body
-  User.findUser(email)
-  .then((user, done) => {
-    if (user[0]) {
+  DbUser.findUser(email)
+  .then((user) => {
+    if (user) {
       request.flash('creationError', 'User already exists.')
       response.redirect('/sign_up')
     } else {
-      const hashedPassword = hash(password)
-      User.addNewUser(email, hashedPassword)
+      User.addNewUser(email, password)
       .then(() => {
         console.log(`account created for: ${email}`)
-        response.redirect('/')
+        passport.authenticate('local')
+        (request, response, () => {
+          response.redirect('/home')
+        })
       })
     }
   })

@@ -7,8 +7,8 @@
     "start": "node app.js",
     "start:dev": "nodemon server.js",
     "db:reset": "dropdb contacts && createdb contacts && npm run load_schema",
-    "load_schema": "psql contacts < schema.sql",
-    "load_contacts": "psql contacts < contacts.sql",
+    "load_schema": "psql contacts < ./database/schema.sql",
+    "load_contacts": "psql contacts < ./database/contacts.sql",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -23,6 +23,7 @@
     "express-session": "^1.15.3",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
+    "passport-oauth": "^1.0.0",
     "pg-promise": "^6.2.1"
   },
   "devDependencies": {

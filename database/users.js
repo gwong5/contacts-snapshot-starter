@@ -4,17 +4,18 @@ const db = pgp(connectionString)
 
 const users = {}
 
-users.addNewUser = (email, password) => {
+users.addNewUser = (email, saltedPassword) => {
   return db.query(`
     INSERT INTO 
-      users (email, password)
+      users (email, salted_password)
     VALUES
       ($1, $2)
   `,
   [
     email,
-    password
+    saltedPassword
   ])
+  
   .catch(error => error)
 }
 
@@ -30,7 +31,7 @@ users.findUser = (email) => {
   [
     email
   ])
-  .then(data => data)
+  .then(user => user[0])
   .catch(error => error)
 }
 
@@ -46,23 +47,7 @@ users.findById = (id) => {
   [
     id
   ])
-  .then(user => user)
-  .catch(error => error)
-}
-
-users.validatePassword = (email, password) => {
-  return db.query(`
-    SELECT 
-      * 
-    FROM 
-      users 
-    WHERE 
-      email = $1 AND password = $2
-  `, [
-    email, 
-    password
-  ])
-  .then(user => user)
+  .then(user => user[0])
   .catch(error => error)
 }
 

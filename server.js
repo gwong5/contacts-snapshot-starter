@@ -3,7 +3,7 @@ const passport = require('passport')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 const flash = require('connect-flash')
-const database = require('./database')
+const database = require('./database/database')
 const {renderError} = require('./server/utils')
 const contacts = require('./server/routes/contacts')
 const users = require('./server/routes/auth')
@@ -34,6 +34,10 @@ app.use((request, response, next) => {
   const { user } = request
   response.locals.user = user
   next()
+})
+
+app.get('/tos', (request, response) => {
+  response.render('tos')
 })
 
 app.get('/', (request, response) => {

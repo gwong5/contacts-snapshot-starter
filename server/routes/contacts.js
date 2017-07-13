@@ -1,5 +1,5 @@
 const express = require('express')
-const database = require('../../database')
+const database = require('../../database/database')
 const {renderError} = require('../utils')
 
 const router = express.Router()
@@ -11,7 +11,7 @@ router.get('/new', (request, response) => {
 router.post('/', (request, response) => {
   database.createContact(request.body)
     .then(function(contact) {
-      if (contact) return response.redirect(`/contacts/${contact[0].id}`)
+      if (contact) return response.redirect(`/contacts/${contact.id}`)
       next()
     })
     .catch( error => renderError(error, response, response) )
